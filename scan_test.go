@@ -23,8 +23,9 @@ func TestScan(t *testing.T) {
 	hostname := "localhost"
 	startingPort := 1
 	endingPort := 1024
+	numWorkers := 10
 
-	results := Scan(d, "tcp", hostname, startingPort, endingPort)
+	results := Scan(d, "tcp", hostname, startingPort, endingPort, numWorkers)
 
 	// Assert that the number of results matches the expected number of ports
 	expectedNumResults := endingPort - startingPort + 1

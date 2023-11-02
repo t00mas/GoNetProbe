@@ -35,13 +35,13 @@ func TCPScan(dialer Dialer, hostname string, port int) bool {
 	return true
 }
 
-func Scan(dialer Dialer, protocol, hostname string, startingPort, endingPort int) []ScanResult {
+func Scan(dialer Dialer, protocol, hostname string, startingPort, endingPort, numWorkers int) []ScanResult {
 	var wg sync.WaitGroup
 	ports := make(chan int)
 	results := make(chan ScanResult)
 
 	// Start the workers
-	for i := 0; i < 100; i++ {
+	for i := 0; i < numWorkers; i++ {
 		wg.Add(1) // Increment WaitGroup counter for each worker
 		go func() {
 			defer wg.Done() // Call Done() when the worker finishes
@@ -75,11 +75,11 @@ func Scan(dialer Dialer, protocol, hostname string, startingPort, endingPort int
 }
 
 // InitialScan scans the first 1024 ports
-func InitialTCPScan(dialer Dialer, hostname string) []ScanResult {
-	return Scan(dialer, "tcp", hostname, 1, 1024)
+func InitialTCPScan(dialer Dialer, hostname string, numWorkers int) []ScanResult {
+	return Scan(dialer, "tcp", hostname, 1, 1024, numWorkers)
 }
 
 // WideScan scans the first 49152 ports
-func WideTCPScan(dialer Dialer, hostname string) []ScanResult {
-	return Scan(dialer, "tcp", hostname, 1, 49152)
+func WideTCPScan(dialer Dialer, hostname string, numWorkers int) []ScanResult {
+	return Scan(dialer, "tcp", hostname, 1, 49152, numWorkers)
 }
