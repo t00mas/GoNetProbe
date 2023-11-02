@@ -42,8 +42,9 @@ func Scan(dialer Dialer, protocol, hostname string, startingPort, endingPort int
 
 	// Start the workers
 	for i := 0; i < 100; i++ {
+		wg.Add(1) // Increment WaitGroup counter for each worker
 		go func() {
-			defer wg.Done()
+			defer wg.Done() // Call Done() when the worker finishes
 			for port := range ports {
 				result := ScanPort(dialer, protocol, hostname, port)
 				results <- ScanResult{Port: port, Open: result}
@@ -52,17 +53,20 @@ func Scan(dialer Dialer, protocol, hostname string, startingPort, endingPort int
 	}
 
 	// Send ports to be scanned
-	for i := startingPort; i <= endingPort; i++ {
-		wg.Add(1)
-		ports <- i
-	}
+	go func() {
+		for i := startingPort; i <= endingPort; i++ {
+			ports <- i
+		}
+		close(ports) // Close the channel after all ports have been sent
+	}()
 
-	close(ports)
-	wg.Wait()
+	go func() {
+		wg.Wait()      // Wait for all workers to finish
+		close(results) // Close the results channel after all workers have finished
+	}()
 
 	// Collect the results
 	var scanResults []ScanResult
-	close(results)
 	for result := range results {
 		scanResults = append(scanResults, result)
 	}

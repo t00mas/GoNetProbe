@@ -17,3 +17,25 @@ func TestTCPScan(t *testing.T) {
 		t.Errorf("Expected false, got %v", result)
 	}
 }
+
+func TestScan(t *testing.T) {
+	d := &MockDialer{shouldSucceed: true}
+	hostname := "localhost"
+	startingPort := 1
+	endingPort := 1024
+
+	results := Scan(d, "tcp", hostname, startingPort, endingPort)
+
+	// Assert that the number of results matches the expected number of ports
+	expectedNumResults := endingPort - startingPort + 1
+	if len(results) != expectedNumResults {
+		t.Errorf("Expected %d results, but got %d", expectedNumResults, len(results))
+	}
+
+	// Assert that all ports are within the expected range
+	for _, result := range results {
+		if result.Port < startingPort || result.Port > endingPort {
+			t.Errorf("Port %d is out of range", result.Port)
+		}
+	}
+}

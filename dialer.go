@@ -1,7 +1,7 @@
 package gonetprobe
 
 import (
-	"fmt"
+	"errors"
 	"net"
 	"time"
 )
@@ -14,12 +14,12 @@ type MockDialer struct {
 	shouldSucceed bool
 }
 
-func (md *MockDialer) DialTimeout(network, address string, timeout time.Duration) (net.Conn, error) {
-	if md.shouldSucceed {
-		// Return a dummy net.Conn and a nil error
-		return &net.TCPConn{}, nil
+func (d *MockDialer) DialTimeout(network, address string, timeout time.Duration) (net.Conn, error) {
+	if d.shouldSucceed {
+		// Return a successful connection
+		return &MockConn{}, nil
 	} else {
-		// Return a nil net.Conn and a dummy error
-		return nil, fmt.Errorf("mock error")
+		// Return an error to simulate failure
+		return nil, errors.New("connection failed")
 	}
 }
